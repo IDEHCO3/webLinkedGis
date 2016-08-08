@@ -1,0 +1,11 @@
+#config files
+.idea/*
+
+#compiled files
+*.pyc
+
+#temp files
+*~
+
+#migrations
+*/migrations/*
