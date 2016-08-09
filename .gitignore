@@ -9,3 +9,6 @@
 
 #migrations
 */migrations/*
+
+#database
+db.sqlite3

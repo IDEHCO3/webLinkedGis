@@ -1,0 +1,34 @@
+{% load i18n %}
+{% load  staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Web Linked GIS</title>
+
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link href="{% static 'bootstrap/css/bootstrap-theme.min.css' %}">
+
+    <link rel="stylesheet" href="{% static 'leaflet/leaflet.css' %}">
+
+    <link rel="stylesheet" href="{% static 'mapPage/main.css' %}">
+
+    <script src="{% static 'jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'angular/angular.min.js' %}"></script>
+
+    <script src="{% static 'leaflet/leaflet.js' %}"></script>
+</head>
+<body>
+    <div id="map-wrapper">
+        <div id="map"></div>
+        <div id="container-wrapper">
+            <div class="container">
+                <div class="col-md-4">
+                    <input type="text" placeholder="type here the link to some layer" class="form-control"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'mapPage/main.js' %}"></script>
+</body>
+</html>
