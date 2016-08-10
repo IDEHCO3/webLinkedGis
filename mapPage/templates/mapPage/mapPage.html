@@ -22,9 +22,9 @@
     <div id="map-wrapper">
         <div id="map"></div>
         <div id="container-wrapper">
-            <div class="container">
+            <div class="container" ng-app="webgis" ng-controller="mainController">
                 <div class="col-md-4">
-                    <input type="text" placeholder="type here the link to some layer" class="form-control"/>
+                    <input type="text" placeholder="type here the link to some layer" ng-model="linkLayer" ng-enter="loadLayer()" class="form-control"/>
                 </div>
             </div>
         </div>
