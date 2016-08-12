@@ -32,6 +32,7 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
 
     $scope.linkLayer = '';
     $scope.linkcontext = '';
+    $scope.layers = [];
 
     var that = this;
 
@@ -42,6 +43,34 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
                 console.log("data: ", data);
                 $scope.linkcontext = that.getContextLink(headers);
                 console.log($scope.linkcontext);
+                var layer = {data: data, context: null, geometryField: null};
+                // get the context with the link in $scope.linkcontext if it is not null.
+                if($scope.linkcontext != null){
+                    $http.get($scope.linkcontext)
+                        .success(function(data){
+                            layer.context = data;
+                            layer.geometryField = that.getTheGeometryField(data);
+                            console.log("here is the context: ",data);
+
+                            if(that.isURL(layer.geometryField, layer.context)) {
+                                for(var i=0; i<layer.data.length; i++) {
+                                    $http.get(layer.data[i][layer.geometryField])
+                                        .success(function (data) {
+                                            //layer.data[i][layer.geometryField] = data;
+                                            L.geoJson(data).addTo(map);
+                                        })
+                                        .error(function (data) {
+                                            //console.log("Error to get geometry from data["+i+"]["+layer.geometryField+"] with value: "+layer.data[i][layer.geometryField]);
+                                        });
+                                }
+                            }
+                        })
+                        .error(function(data){
+                            console.log("Error to get context data!");
+                        });
+                }
+
+                $scope.layers.push(layer);
 
             })
             .error(function(data, status, headers, config) {
@@ -49,9 +78,17 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
             });
     };
 
+    this.isURL = function(geometryField, context){
+        return true;
+    }
+
+    this.getTheGeometryField = function(context){
+        return "url_geometry";
+    };
+
     this.getContextLink = function(headers){
         var linkheader = headers('link');
-        var globalLink = '';
+        var globalLink = null;
         if(linkheader == null){
             console.log("No context link found!");
         }
