@@ -51,14 +51,14 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
         $scope.linkcontext = that.getContextLink(headers);
         console.log($scope.linkcontext);
         var layer = {data: data, context: null, geometryFieldName: null, geometry: []};
-        // get the context with the link in $scope.linkcontext if it is not null.
+
         if($scope.linkcontext != null){
-            $http.get($scope.linkcontext)
-                .success(function(data){
-                    layer.context = data;
-                    layer.geometryFieldName = that.getTheGeometryField(data);
-                    that.getDataFromURLFields(layer);
-                    that.loadGeometry(layer);
+            $http.get($scope.linkcontext, {layer: layer})
+                .success(function(data, status, headers, config){
+                    config.layer.context = data;
+                    config.layer.geometryFieldName = that.getTheGeometryField(data);
+                    that.getDataFromURLFields(config.layer);
+                    that.loadGeometry(config.layer);
                 })
                 .error(function(data){
                     console.log("Error to get context data!");
@@ -71,11 +71,11 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
     this.loadGeometry = function(layer){
         if(that.isURLTheGeometryField(layer.geometryFieldName, layer.context)) {
             for(var i=0; i<layer.data.length; i++) {
-                var index = i;
-                $http.get(layer.data[i][layer.geometryFieldName])
-                    .success(function (data) {
-                        layer.geometry.push(data);
-                        data.properties = layer.data[index];
+                // the answer for this problem: http://stackoverflow.com/questions/14220321/how-do-i-return-the-response-from-an-asynchronous-call/14220323#14220323
+                $http.get(layer.data[i][layer.geometryFieldName],{i: i, layer: layer})
+                    .success(function (data, status, headers, config) {
+                        config.layer.geometry.push(data);
+                        data.properties = config.layer.data[config.i];
                         L.geoJson(data,{
                             onEachFeature: that.onEachFeature
                         }).addTo(map);
@@ -92,26 +92,18 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
 
         for(var i=0; i<layer.data.length; i++){
             for(var j=0;  j<fields_list.length; j++){
-                if(layer.data[i]){
-                    var url = layer.data[i][fields_list[j]];
-                    var index1 = i;
-                    var index2 = j;
-                    $http.get(url)
-                        .success(function (data) {
-                            console.log("object come from bcedgv: ", data);
-                            for(var field in data){
-                                layer.data[index1][fields_list[index2]] = data[field];
-                                break;
-                            }
+                var url = layer.data[i][fields_list[j]];
+                $http.get(url, {layer: layer, i: i, field_name: fields_list[j]})
+                    .success(function (data, status, headers, config) {
+                        for(var field in data){
+                            config.layer.data[config.i][config.field_name] = data[field];
+                            break;
+                        }
 
-                        })
-                        .error(function (data) {
-                            console.log("Error: during");
-                        });
-                }
-                else{
-                    console.log("Error: url undefined! ", layer.data[i], fields_list[j]);
-                }
+                    })
+                    .error(function (data) {
+                        console.log("Error: during");
+                    });
             }
         }
     };
