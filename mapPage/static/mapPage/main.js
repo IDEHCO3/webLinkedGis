@@ -1,5 +1,9 @@
+$(".togglePanelBody").click(function(){
+    var $dataToggle = $($(this).attr('data-toggle'));
+    $dataToggle.toggleClass('hidden');
+});
 
-var map = L.map('map').setView([-22.862663, -43.225825], 14);
+var map = L.map('map').setView([-22.862663, -43.225825], 5);
 map.zoomControl.setPosition('bottomright');
 
 mapLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
@@ -38,19 +42,48 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
 
     $scope.loadLayer = function(){
         console.log($scope.linkLayer);
-        $http.get($scope.linkLayer)
-            .success(function(data, status, headers, config) {
-                that.loadAllData(data, headers);
-            })
-            .error(function(data, status, headers, config) {
-                console.log("Error to get data layer!");
-            });
+        if(!that.isLayerLoaded($scope.linkLayer)) {
+            $http.get($scope.linkLayer)
+                .success(function (data, status, headers, config) {
+                    that.loadAllData(data, headers, config.url);
+                })
+                .error(function (data) {
+                    console.log("Error to get data layer!");
+                });
+        }
+        else{
+            console.log("The layer was already loaded!");
+        }
     };
 
-    this.loadAllData = function(data, headers){
+    $scope.toggleLayer = function(layer, divName, divClassName){
+        var $div = $(divName);
+        $div.toggleClass(divClassName);
+
+        if(layer.active) {
+            map.removeLayer(layer.layerGroup);
+            layer.active = false;
+        }
+        else{
+            layer.layerGroup.addTo(map);
+            layer.active = true;
+        }
+    };
+
+    this.isLayerLoaded = function(url){
+        for(var i=0; $scope.layers.length; i++){
+            if(url == $scope.layers[i].url){
+                return true;
+            }
+        }
+        return false;
+    };
+
+    this.loadAllData = function(data, headers, url){
         $scope.linkcontext = that.getContextLink(headers);
         console.log($scope.linkcontext);
-        var layer = {data: data, context: null, geometryFieldName: null, geometry: []};
+        var layer = {data: data, layerGroup: L.layerGroup(), active: true, url: url, context: null, geometryFieldName: null};
+        layer.layerGroup.addTo(map);
 
         if($scope.linkcontext != null){
             $http.get($scope.linkcontext, {layer: layer})
@@ -74,11 +107,13 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
                 // the answer for this problem: http://stackoverflow.com/questions/14220321/how-do-i-return-the-response-from-an-asynchronous-call/14220323#14220323
                 $http.get(layer.data[i][layer.geometryFieldName],{i: i, layer: layer})
                     .success(function (data, status, headers, config) {
-                        config.layer.geometry.push(data);
+
                         data.properties = config.layer.data[config.i];
-                        L.geoJson(data,{
+                        var sublayer = L.geoJson(data,{
                             onEachFeature: that.onEachFeature
-                        }).addTo(map);
+                        });
+
+                        config.layer.layerGroup.addLayer(sublayer);
                     })
                     .error(function (data) {
                         console.log("Error to get geometry");
