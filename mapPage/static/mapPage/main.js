@@ -45,7 +45,17 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
         if(!that.isLayerLoaded($scope.linkLayer)) {
             $http.get($scope.linkLayer)
                 .success(function (data, status, headers, config) {
-                    that.loadAllData(data, headers, config.url);
+                    var content_type = headers("Content-Type");
+                    if(content_type == "application/json") {
+                        that.loadAllData(data, headers, config.url);
+                    }
+                    else if(content_type == "application/vnd.geo+json"){
+                        console.log("Geojson found!");
+                        that.loadGeojson(data);
+                    }
+                    else{
+                        console.log("Error: impossible to load the data with this content type!");
+                    }
                 })
                 .error(function (data) {
                     console.log("Error to get data layer!");
@@ -69,6 +79,8 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
             layer.active = true;
         }
     };
+
+    this.loadGeojson = function(data){};
 
     this.isLayerLoaded = function(url){
         for(var i=0; $scope.layers.length; i++){
