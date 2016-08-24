@@ -33,7 +33,16 @@
                                 <h3 class="panel-title">Layers</h3>
                             </div>
                             <div id="layersList" class="list-group">
-                                <div id="itemLayer{$ $index $}" class="list-group-item list-group-item-success" ng-repeat="layer in layers" ng-click="toggleLayer(layer, '#itemLayer'+$index, 'list-group-item-success')">{$ layer.url $}</div>
+                                <div id="itemLayer{$ $index $}" class="list-group-item list-group-item-success" ng-repeat="layer in layers" ng-click="toggleLayer(layer, '#itemLayer'+$index, 'list-group-item-success')">
+                                    <ul class="list-inline">
+                                        <li>
+                                            {$ layer.host $}
+                                        </li>
+                                        <li>
+                                            {$ layer.path $}
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>

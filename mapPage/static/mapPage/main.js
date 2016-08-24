@@ -46,6 +46,7 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
             $http.get($scope.linkLayer)
                 .success(function (data, status, headers, config) {
                     var content_type = headers("Content-Type");
+
                     if(content_type == "application/json") {
                         that.loadAllData(data, headers, config.url);
                     }
@@ -90,7 +91,7 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
     };
 
     this.isLayerLoaded = function(url){
-        for(var i=0; $scope.layers.length; i++){
+        for(var i=0; i<$scope.layers.length; i++){
             if(url == $scope.layers[i].url){
                 return true;
             }
@@ -98,10 +99,22 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
         return false;
     };
 
+    this.getPathFromURL = function(url){
+        if( url[url.length-1] != '/') url += '/';
+        var path = '/' + url.match(/\/\/(.+?)\/(.+)\//)[2];
+        return path;
+    };
+
+    this.getHostFromURL = function(url){
+        if( url[url.length-1] != '/') url += '/';
+        var host = url.match(/\/\/(.+?)\//)[1];
+        return host;
+    };
+
     this.createLayer = function(url){
         var layergroup = L.layerGroup();
         layergroup.addTo(map);
-        return {url: url, data: null, layerGroup: layergroup, active: true, context: null, geometryFieldName: null};
+        return {url: url, host: that.getHostFromURL(url), path: that.getPathFromURL(url), data: null, layerGroup: layergroup, active: true, context: null, geometryFieldName: null};
     };
 
     this.loadAllData = function(data, headers, url){
