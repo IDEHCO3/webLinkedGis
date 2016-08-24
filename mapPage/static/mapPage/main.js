@@ -51,7 +51,7 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
                     }
                     else if(content_type == "application/vnd.geo+json"){
                         console.log("Geojson found!");
-                        that.loadGeojson(data);
+                        that.loadGeojson(config.url, data);
                     }
                     else{
                         console.log("Error: impossible to load the data with this content type!");
@@ -80,7 +80,14 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
         }
     };
 
-    this.loadGeojson = function(data){};
+    this.loadGeojson = function(url, data){
+        var layer = that.createLayer(url);
+        var sublayer = L.geoJson(data,{
+            onEachFeature: that.onEachFeature
+        });
+        layer.layerGroup.addLayer(sublayer);
+        $scope.layers.push(layer);
+    };
 
     this.isLayerLoaded = function(url){
         for(var i=0; $scope.layers.length; i++){
@@ -91,11 +98,17 @@ app.controller('mainController', ['$scope', '$http', function($scope, $http){
         return false;
     };
 
+    this.createLayer = function(url){
+        var layergroup = L.layerGroup();
+        layergroup.addTo(map);
+        return {url: url, data: null, layerGroup: layergroup, active: true, context: null, geometryFieldName: null};
+    };
+
     this.loadAllData = function(data, headers, url){
         $scope.linkcontext = that.getContextLink(headers);
         console.log($scope.linkcontext);
-        var layer = {data: data, layerGroup: L.layerGroup(), active: true, url: url, context: null, geometryFieldName: null};
-        layer.layerGroup.addTo(map);
+        var layer = that.createLayer(url);
+        layer.data = data;
 
         if($scope.linkcontext != null){
             $http.get($scope.linkcontext, {layer: layer})
