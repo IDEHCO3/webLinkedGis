@@ -17,6 +17,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
+STATIC_ROOT = os.path.join(BASE_DIR, "static_root/")
+
 STATICFILES_DIRS = [
     os.path.join(PROJECT_ROOT, "static"),
 ]
@@ -28,9 +30,9 @@ STATICFILES_DIRS = [
 SECRET_KEY = 'q(v%73rq237s6m^j71e_zac0a3bk_5x#7-wkozy&uhmuw!ym$_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -59,6 +61,8 @@ MIDDLEWARE_CLASSES = (
 )
 
 ROOT_URLCONF = 'webLinkedGis.urls'
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 TEMPLATES = [
     {
@@ -108,4 +112,4 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/weblinkedgis/static/'
