@@ -12,3 +12,9 @@
 
 #database
 db.sqlite3
+
+#static
+static_root/*
+
+#nginx
+nginx/*
